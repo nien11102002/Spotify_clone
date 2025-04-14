@@ -1,15 +1,133 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-    output   = "../generated/prisma"
+  output   = "../prisma/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model artists {
+  id          Int       @id @default(autoincrement())
+  user_id     Int
+  artist_name String    @unique @db.VarChar(255)
+  bio         String?
+  created_at  DateTime? @default(now()) @db.Timestamp(6)
+  updated_at  DateTime? @default(now()) @db.Timestamp(6)
+  users       users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model comments {
+  id               Int        @id @default(autoincrement())
+  user_id          Int
+  song_id          Int
+  content          String
+  discuss_date     DateTime?  @default(now()) @db.Timestamp(6)
+  reply_discuss_id Int?
+  created_at       DateTime?  @default(now()) @db.Timestamp(6)
+  updated_at       DateTime?  @default(now()) @db.Timestamp(6)
+  comments         comments?  @relation("commentsTocomments", fields: [reply_discuss_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_comments   comments[] @relation("commentsTocomments")
+  songs            songs      @relation(fields: [song_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users            users      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model friend_list {
+  id                                 Int       @id @default(autoincrement())
+  user_id                            Int
+  friend_id                          Int
+  room_chat                          String?   @db.VarChar(255)
+  created_at                         DateTime? @default(now()) @db.Timestamp(6)
+  updated_at                         DateTime? @default(now()) @db.Timestamp(6)
+  users_friend_list_friend_idTousers users     @relation("friend_list_friend_idTousers", fields: [friend_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_friend_list_user_idTousers   users     @relation("friend_list_user_idTousers", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model playlist_songs {
+  id          Int       @id @default(autoincrement())
+  playlist_id Int
+  song_id     Int
+  created_at  DateTime? @default(now()) @db.Timestamp(6)
+  updated_at  DateTime? @default(now()) @db.Timestamp(6)
+  playlists   playlists @relation(fields: [playlist_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  songs       songs     @relation(fields: [song_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model playlists {
+  id             Int              @id @default(autoincrement())
+  user_id        Int
+  image_path     String?
+  playlist_name  String           @db.VarChar(255)
+  description    String?
+  create_date    DateTime?        @default(now()) @db.Timestamp(6)
+  updated_at     DateTime?        @default(now()) @db.Timestamp(6)
+  playlist_songs playlist_songs[]
+  users          users            @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model queue_songs {
+  id           Int       @id @default(autoincrement())
+  user_id      Int
+  song_id      Int
+  position     Int
+  current_time Int?      @default(0)
+  created_at   DateTime? @default(now()) @db.Timestamp(6)
+  updated_at   DateTime? @default(now()) @db.Timestamp(6)
+  songs        songs     @relation(fields: [song_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users        users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model song_genres {
+  id         Int       @id @default(autoincrement())
+  genre_name String    @unique @db.VarChar(255)
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
+  songs      songs[]
+}
+
+model songs {
+  id              Int              @id @default(autoincrement())
+  user_id         Int
+  genre_id        Int?
+  song_name       String           @db.VarChar(255)
+  viewer          Int?             @default(0)
+  duration        String?          @db.VarChar(10)
+  popular         Boolean?         @default(false)
+  description     String?
+  song_image      String?
+  public_date     DateTime?        @db.Date
+  file_path       String
+  discuss_quality Int?             @default(0)
+  created_at      DateTime?        @default(now()) @db.Timestamp(6)
+  updated_at      DateTime?        @default(now()) @db.Timestamp(6)
+  comments        comments[]
+  playlist_songs  playlist_songs[]
+  queue_songs     queue_songs[]
+  song_genres     song_genres?     @relation(fields: [genre_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users           users            @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model users {
+  id                                       Int           @id @default(autoincrement())
+  account                                  String        @unique @db.VarChar(255)
+  name                                     String        @db.VarChar(255)
+  nationality                              String?       @db.VarChar(100)
+  channel_name                             String?       @db.VarChar(255)
+  avatar                                   String?
+  description                              String?
+  banner                                   String?
+  refresh_token                            String?
+  role                                     String        @default("user") @db.VarChar(50)
+  is_artist                                Boolean?      @default(false)
+  password                                 String        @db.VarChar(255)
+  created_at                               DateTime?     @default(now()) @db.Timestamp(6)
+  updated_at                               DateTime?     @default(now()) @db.Timestamp(6)
+  artists                                  artists[]
+  comments                                 comments[]
+  friend_list_friend_list_friend_idTousers friend_list[] @relation("friend_list_friend_idTousers")
+  friend_list_friend_list_user_idTousers   friend_list[] @relation("friend_list_user_idTousers")
+  playlists                                playlists[]
+  queue_songs                              queue_songs[]
+  songs                                    songs[]
 }
