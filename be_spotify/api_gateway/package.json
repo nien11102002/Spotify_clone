@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "prisma:postgres": "npx prisma db pull --schema src/prisma/postgresql.prisma/schema.prisma && npx prisma generate --schema src/prisma/postgresql.prisma/schema.prisma",
-    "prisma:mysql": "npx prisma db pull --schema src/prisma/mysql .prisma/schema.prisma && npx prisma generate --schema src/prisma/mysql .prisma/schema.prisma",
+    "prisma:mysql": "npx prisma db pull --schema src/prisma/mysql.prisma/schema.prisma && npx prisma generate --schema src/prisma/mysql.prisma/schema.prisma",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
