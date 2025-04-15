@@ -1,34 +1,114 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import {
+  BadGatewayException,
+  BadRequestException,
+  Controller,
+  Get,
+} from '@nestjs/common';
+import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import * as bcrypt from 'bcrypt';
+import { TUserAccount } from 'types/type';
+import { PrismaService } from 'src/prisma/prisma.service';
 
-@Controller('auth')
+@Controller()
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private prisma: PrismaService,
+    private jwtService: JwtService,
+    private configService: ConfigService,
+  ) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  @MessagePattern('login')
+  async login(@Payload() data) {
+    const { identifier, password } = data;
+
+    const userExists = await this.prisma.users.findFirst({
+      where: {
+        OR: [{ account: identifier }],
+      },
+      select: {
+        id: true,
+        password: true,
+      },
+    });
+    if (!userExists)
+      throw new RpcException({
+        statusCode: 400,
+        message: 'User not exist, please register!',
+      });
+
+    const passHash = userExists.password;
+    const isPassword = bcrypt.compareSync(password, passHash);
+    if (!isPassword)
+      throw new RpcException({
+        statusCode: 502,
+        message: 'Wrong password or account!',
+      });
+
+    const tokens = this.createTokens(userExists);
+
+    return tokens;
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+  createTokens(userExists: TUserAccount) {
+    const accessToken = this.jwtService.sign(
+      { user_id: userExists.id },
+      {
+        secret: this.configService.get<string>('ACCESS_TOKEN_SECRET'),
+        expiresIn: this.configService.get<string>('ACCESS_TOKEN_EXPIRES'),
+      },
+    );
+
+    const refreshToken = this.jwtService.sign(
+      { user_id: userExists.id },
+      {
+        secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
+        expiresIn: this.configService.get<string>('REFRESH_TOKEN_EXPIRES'),
+      },
+    );
+
+    return { accessToken, refreshToken };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
-  }
+  @MessagePattern('register')
+  async register(@Payload() data) {
+    const { password, account, repassword } = data;
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
+    var userExists = await this.prisma.users.findFirst({
+      where: {
+        OR: [{ account: account }],
+      },
+    });
+    if (userExists)
+      throw new RpcException({
+        statusCode: 400,
+        message: 'Account already exists',
+      });
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+    if (password !== repassword)
+      throw new RpcException({
+        statusCode: 502,
+        message: 'Not similar password',
+      });
+
+    const hashPassword = bcrypt.hashSync(password, 10);
+
+    const userNew = await this.prisma.users.create({
+      data: {
+        account: account,
+        password: hashPassword,
+        name: 'test',
+      },
+      select: {
+        id: true,
+        account: true,
+        name: true,
+      },
+    });
+
+    const tokens = this.createTokens(userNew);
+
+    return { tokens, userNew };
   }
 }
