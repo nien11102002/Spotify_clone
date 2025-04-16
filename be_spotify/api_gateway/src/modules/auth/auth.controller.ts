@@ -34,10 +34,18 @@ export class AuthController {
   @Public()
   @Post(`/register`)
   async register(@Body() registerDto: RegisterDto) {
-    let registerUser = await lastValueFrom(
-      this.userService.send('register', registerDto),
-    );
-
-    return registerUser;
+    try {
+      let registerUser = await lastValueFrom(
+        this.userService.send('register', registerDto).pipe(
+          catchError((err) => {
+            const { statusCode = 500, message = 'Internal server error' } = err;
+            return throwError(() => new HttpException(message, statusCode));
+          }),
+        ),
+      );
+      return registerUser;
+    } catch (err) {
+      throw err;
+    }
   }
 }

@@ -16,6 +16,7 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalInterceptors(new ResponseInterceptor());
   app.enableCors();
+  app.setGlobalPrefix('api');
 
   const config = new DocumentBuilder()
     .setTitle('NestJS')
