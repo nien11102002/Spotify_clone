@@ -40,5 +40,7 @@ export class FriendController {
         }),
       ),
     );
+
+    return friendList;
   }
 }
