@@ -40,12 +40,12 @@ interface Playlist {
 const playlistApi = {
   // 1. Lấy danh sách tất cả các playlist
   getAllPlaylists: () => {
-    return api.get("/get-all-playlist");
+    return api.get("/get-all-playlists");
   },
 
   // 2. Lấy danh sách playlist của một người dùng cụ thể
   getPlaylistOfUser: (userId: number) => {
-    return api.get<GetPlaylistsResponse>(`/get-playlist-of-user?id=${userId}`);
+    return api.get<GetPlaylistsResponse>(`/get-playlists-of-user?id=${userId}`);
   },
 
   // 3. Tạo một playlist mới

@@ -1,12 +1,253 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
+import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
+import { PrismaService } from './prisma/prisma.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private prisma: PrismaService) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @MessagePattern('get-all-playlists')
+  async getAllPlaylists(@Payload() data) {
+    const allPlaylists = await this.prisma.playlists.findMany({
+      include: {
+        users: true,
+        playlist_songs: true,
+      },
+    });
+    return allPlaylists;
+  }
+
+  @MessagePattern('get-playlists-of-user')
+  async getPlaylistOfUser(@Payload() data) {
+    const id = +data.id;
+
+    const existUser = await this.prisma.users.findUnique({
+      where: { id: id },
+    });
+
+    if (!existUser) {
+      throw new RpcException({
+        statusCode: 404,
+        message: 'User not found',
+      });
+    }
+
+    const userPlaylist = await this.prisma.playlists.findMany({
+      where: {
+        user_id: id,
+      },
+    });
+
+    const formatReturn = userPlaylist.map((playlist) => {
+      return {
+        id: playlist.id,
+        userId: playlist.user_id,
+        playlistName: playlist.playlist_name,
+        description: playlist.description,
+        createDate: playlist.create_date,
+      };
+    });
+
+    return formatReturn;
+  }
+
+  @MessagePattern('get-playlist-detail')
+  async getPlaylistDetail(@Payload() data) {
+    const id = +data.id;
+
+    const existPlaylist = await this.prisma.playlists.findUnique({
+      where: { id: id },
+      include: {
+        playlist_songs: true,
+      },
+    });
+
+    if (!existPlaylist) {
+      throw new RpcException({
+        statusCode: 404,
+        message: 'Playlist not found',
+      });
+    }
+
+    return existPlaylist;
+  }
+
+  @MessagePattern('get-song-in-playlist')
+  async getSongInPlaylist(@Payload() data) {
+    const playlistId = +data.playlistId;
+
+    const existPlaylist = await this.prisma.playlists.findUnique({
+      where: { id: playlistId },
+    });
+
+    if (!existPlaylist) {
+      throw new RpcException({
+        statusCode: 404,
+        message: 'Playlist not found',
+      });
+    }
+
+    const playlist_songs = await this.prisma.playlist_songs.findMany({
+      where: { playlist_id: playlistId },
+      include: {
+        songs: true,
+      },
+    });
+
+    return playlist_songs;
+  }
+
+  @MessagePattern('add-playlist')
+  async addPlaylist(@Payload() data) {
+    const { createPlaylistDto } = data;
+    const { userId, playlistName, description } = createPlaylistDto;
+
+    const existUser = await this.prisma.users.findUnique({
+      where: { id: +userId },
+    });
+
+    if (!existUser) {
+      throw new RpcException({
+        statusCode: 404,
+        message: 'User not found',
+      });
+    }
+
+    const newPlaylist = await this.prisma.playlists.create({
+      data: {
+        user_id: +userId,
+        playlist_name: playlistName,
+        description: description,
+      },
+    });
+
+    return newPlaylist;
+  }
+
+  @MessagePattern('add-song-to-playlist')
+  async addSongToPlaylist(@Payload() data) {
+    const { addSongToPlaylistDto } = data;
+    const { playlistId, songId } = addSongToPlaylistDto;
+
+    const existPlaylist = await this.prisma.playlists.findUnique({
+      where: { id: +playlistId },
+    });
+
+    if (!existPlaylist) {
+      throw new RpcException({
+        statusCode: 404,
+        message: 'Playlist not found',
+      });
+    }
+
+    const existSong = await this.prisma.songs.findUnique({
+      where: { id: +songId },
+    });
+
+    if (!existSong) {
+      throw new RpcException({
+        statusCode: 404,
+        message: 'Song not found',
+      });
+    }
+
+    const newPlaylistSong = await this.prisma.playlist_songs.create({
+      data: {
+        playlist_id: +playlistId,
+        song_id: +songId,
+      },
+    });
+
+    return newPlaylistSong;
+  }
+
+  @MessagePattern('create-playlist')
+  async createPlaylist(@Payload() data) {
+    const { createPlaylistDto } = data;
+    const { userId, playlistName, description, imagePath } = createPlaylistDto;
+
+    const existUser = await this.prisma.users.findUnique({
+      where: { id: +userId },
+    });
+
+    const existedPlaylist = await this.prisma.playlists.findFirst({
+      where: { playlist_name: playlistName, user_id: userId },
+    });
+
+    if (!existUser) {
+      throw new RpcException({
+        statusCode: 404,
+        message: 'User not found',
+      });
+    }
+
+    if (existedPlaylist) {
+      throw new RpcException({
+        statusCode: 400,
+        message: 'Playlist name already exists',
+      });
+    }
+
+    const newPlaylist = await this.prisma.playlists.create({
+      data: {
+        user_id: +userId,
+        playlist_name: playlistName,
+        description: description,
+        image_path: imagePath,
+      },
+    });
+
+    return newPlaylist;
+  }
+
+  @MessagePattern('edit-playlist')
+  async editPlaylist(@Payload() data) {
+    const { playlistId, updatePlaylistDto } = data;
+    const { playlistName, description, imagePath } = updatePlaylistDto;
+
+    const existPlaylist = await this.prisma.playlists.findUnique({
+      where: { id: +playlistId },
+    });
+
+    if (!existPlaylist) {
+      throw new RpcException({
+        statusCode: 404,
+        message: 'Playlist not found',
+      });
+    }
+
+    const updatedPlaylist = await this.prisma.playlists.update({
+      where: { id: +playlistId },
+      data: {
+        playlist_name: playlistName,
+        description: description,
+        image_path: imagePath,
+      },
+    });
+
+    return updatedPlaylist;
+  }
+
+  @MessagePattern('delete-playlist')
+  async deletePlaylist(@Payload() data) {
+    const { id } = data;
+
+    const existPlaylist = await this.prisma.playlists.findUnique({
+      where: { id: +id },
+    });
+
+    if (!existPlaylist) {
+      throw new RpcException({
+        statusCode: 404,
+        message: 'Playlist not found',
+      });
+    }
+
+    await this.prisma.playlists.delete({
+      where: { id: +id },
+    });
+
+    return { message: 'Playlist deleted successfully' };
   }
 }
