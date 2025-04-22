@@ -1,11 +1,19 @@
+DROP DATABASE if EXISTS db_spotify;
+
+CREATE DATABASE db_spotify;
+
+use db_spotify;
+
 CREATE TABLE messages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     sender_id INT NOT NULL,
     receiver_id INT NOT NULL,
     message TEXT NOT NULL,
+    room_chat TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
 
 CREATE TABLE follow_list (
     id INT AUTO_INCREMENT PRIMARY KEY,

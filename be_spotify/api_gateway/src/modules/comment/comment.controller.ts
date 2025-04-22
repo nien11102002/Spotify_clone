@@ -12,5 +12,7 @@ export class CommentController {
     const discussResult = await lastValueFrom(
       this.commentService.send('find-discuss', { id }).pipe(handleRpcError()),
     );
+
+    return discussResult;
   }
 }

@@ -13,6 +13,7 @@ import { CommentModule } from './modules/comment/comment.module';
 import { ProductModule } from './modules/product/product.module';
 import { PlaylistModule } from './modules/playlist/playlist.module';
 import { ConfigModule } from '@nestjs/config';
+import { MessageModule } from './modules/message/message.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ConfigModule } from '@nestjs/config';
     ProductModule,
     PlaylistModule,
     ConfigModule.forRoot({ isGlobal: true }),
+    MessageModule,
   ],
   controllers: [AppController],
   providers: [AppService, PostgresqlPrismaService, MysqlPrismaService],
