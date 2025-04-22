@@ -10,10 +10,10 @@ import { MysqlPrismaService } from './prisma/mysql.prisma/mysql.prisma.service';
 import { FriendModule } from './modules/friend/friend.module';
 import { FollowModule } from './modules/follow/follow.module';
 import { CommentModule } from './modules/comment/comment.module';
-import { ProductModule } from './modules/product/product.module';
 import { PlaylistModule } from './modules/playlist/playlist.module';
 import { ConfigModule } from '@nestjs/config';
 import { MessageModule } from './modules/message/message.module';
+import { SongModule } from './modules/song/song.module';
 
 @Module({
   imports: [
@@ -24,10 +24,10 @@ import { MessageModule } from './modules/message/message.module';
     FriendModule,
     FollowModule,
     CommentModule,
-    ProductModule,
     PlaylistModule,
     ConfigModule.forRoot({ isGlobal: true }),
     MessageModule,
+    SongModule,
   ],
   controllers: [AppController],
   providers: [AppService, PostgresqlPrismaService, MysqlPrismaService],
