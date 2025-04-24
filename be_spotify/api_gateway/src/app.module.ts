@@ -14,6 +14,7 @@ import { PlaylistModule } from './modules/playlist/playlist.module';
 import { ConfigModule } from '@nestjs/config';
 import { MessageModule } from './modules/message/message.module';
 import { SongModule } from './modules/song/song.module';
+import { SocketModule } from './modules/socket/socket.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { SongModule } from './modules/song/song.module';
     ConfigModule.forRoot({ isGlobal: true }),
     MessageModule,
     SongModule,
+    SocketModule,
   ],
   controllers: [AppController],
   providers: [AppService, PostgresqlPrismaService, MysqlPrismaService],

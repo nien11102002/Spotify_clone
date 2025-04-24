@@ -16,6 +16,7 @@ export class AuthController {
   @Public()
   @Post(`/login`)
   async login(@Body() loginDto: LoginDto) {
+    console.log(loginDto);
     try {
       const loginUser = await lastValueFrom(
         this.userService.send('login', loginDto).pipe(

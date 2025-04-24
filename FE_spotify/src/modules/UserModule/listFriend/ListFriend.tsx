@@ -14,6 +14,9 @@ interface ContentMessage {
   message: TypeMessage[]; // Định nghĩa là một mảng các TypeMessage
   sender?: TypeUser;
 }
+
+const SOCKET_URL = "http://localhost:8080";
+
 const ListFriend: React.FC = () => {
   const { currentUser } = useAppSelector((state) => state.currentUser);
   const [open, setOpen] = useState(false);
@@ -30,14 +33,20 @@ const ListFriend: React.FC = () => {
   const socketRef = useRef<Socket | null>(null);
   const { friendLists } = useAppSelector((state) => state.friend);
 
-  socketRef.current = io("http://localhost:8080", {
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+  socketRef.current = io(SOCKET_URL, {
+    path: "/socket",
     transports: ["websocket"],
     reconnection: true, // Cho phép tự động kết nối lại
     reconnectionAttempts: Infinity, // Số lần thử kết nối lại
     reconnectionDelay: 1000, // Thời gian chờ giữa các lần thử kết nối lại
     secure: false, // Đặt thành false nếu bạn không sử dụng HTTPS
     timeout: 20000, // Thời gian chờ kết nối (tăng thời gian nếu cần)
-    autoConnect: true, // Tự động kết nối khi khởi tạo
+    autoConnect: true,
+    auth: {
+      token: user?.tokens.accessToken,
+    }, // Tự động kết nối khi khởi tạo
   });
   // show drawer
   const showDrawer = (data?: any) => {
@@ -73,7 +82,7 @@ const ListFriend: React.FC = () => {
   // call function api getListFriend
   useEffect(() => {
     if (currentUser) {
-      callApiGetListFriend(currentUser.user.userId);
+      callApiGetListFriend(currentUser.userId);
     }
   }, [currentUser, friendLists]);
 

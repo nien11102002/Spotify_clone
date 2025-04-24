@@ -1,14 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import "./sidebar.css";
-import {
-  Avatar,
-  Button,
-  Col,
-  Popover,
-  Row,
-  Space,
-  Typography,
-} from "antd";
+import { Avatar, Button, Col, Popover, Row, Space, Typography } from "antd";
 import { useModal } from "../../../globalContext/ModalContext";
 import { useAppSelector } from "../../../redux/hooks";
 import { TypePlaylistPost } from "../../../types/typePlaylist";
@@ -20,9 +12,11 @@ import { getPlaylistByUser } from "../../../apis/apiPlayList/apiGetPlayListByUse
 const { Title, Text } = Typography;
 
 export default function Sidebar() {
-  const { openModal, openPopover, popover } = useModal();
+  const { openModal, openPopover, togglePopover } = useModal();
   const navigate = useNavigate();
   const { currentUser } = useAppSelector((state) => state.currentUser);
+  console.log(currentUser);
+
   const dispatch = useDispatch<AppDispatch>();
   const playlists = useAppSelector((state) => state.playlist.playLists);
   const playListDetailById = useAppSelector(
@@ -32,7 +26,7 @@ export default function Sidebar() {
   const [currentId, setCurrentId] = useState(null);
 
   useEffect(() => {
-    dispatch(getPlaylistByUser(currentUser?.user.userId));
+    dispatch(getPlaylistByUser(currentUser?.userId));
   }, [playListDetailById, currentUser]);
 
   const handleCreatePlayList = async () => {
@@ -61,15 +55,15 @@ export default function Sidebar() {
           <span>Spotify</span>
         </button>
         <div className="flex justify-between items-center library mt-7">
-            <NavLink
-              to="/"
-              className="flex items-center text-white no-underline hover:text-gray-400"
-              style={{ cursor: "pointer" }}
-            >
-              <i className="fa-solid fa-house mr-2"></i>
-              <span>Home</span>
-            </NavLink>
-            </div>
+          <NavLink
+            to="/"
+            className="flex items-center text-white no-underline hover:text-gray-400"
+            style={{ cursor: "pointer" }}
+          >
+            <i className="fa-solid fa-house mr-2"></i>
+            <span>Home</span>
+          </NavLink>
+        </div>
         {/* <NavLink
           to={"search"}
           className={({ isActive }) =>
@@ -110,24 +104,24 @@ export default function Sidebar() {
 
                 <Popover
                   style={{ backgroundColor: "blue", left: "10%" }}
-                  content={<a onClick={popover}>Close</a>}
+                  content={<a onClick={togglePopover}>Close</a>}
                   title={
                     <>
                       <p className="text-lg font-bold">Create a playlist</p>
                       <p>Log in to create and share playlists.</p>
                       <br />
-                      <Button onClick={openModal}>Login</Button>
+                      <Button onClick={() => openModal("login")}>Login</Button>
                     </>
                   }
                   trigger="click"
                   open={openPopover}
                   placement="rightTop"
-                  onOpenChange={popover}
+                  onOpenChange={togglePopover}
                 >
                   <Button
                     type="primary"
                     className="btn-createPlaylist"
-                    onClick={popover}
+                    onClick={togglePopover}
                   >
                     Create playlist
                   </Button>

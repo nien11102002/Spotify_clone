@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CommentController } from './comment.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { CommentGateway } from './comment.gateway';
 
 @Module({
   imports: [
@@ -21,6 +20,6 @@ import { CommentGateway } from './comment.gateway';
     ]),
   ],
   controllers: [CommentController],
-  providers: [CommentService, CommentGateway],
+  providers: [CommentService],
 })
 export class CommentModule {}

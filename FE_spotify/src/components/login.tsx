@@ -5,21 +5,26 @@ import { apiLogin } from "../apis/apiLogin";
 import { useAppDispatch } from "../redux/hooks";
 import { userAction } from "../redux/slice/user.slice";
 import { useModal } from "../globalContext/ModalContext";
+import { useNavigate } from "react-router-dom";
 interface Props {
   propsHiddenModal: () => void;
 }
 const FormLogin: React.FC<Props> = ({ propsHiddenModal }) => {
+  const navigate = useNavigate();
+
   const { openModal } = useModal();
   const dispatch = useAppDispatch();
   const onFinish = async (values: any) => {
     try {
       const result = await apiLogin(values);
+      console.log(values);
 
       if (result) {
         localStorage.setItem("user", JSON.stringify(result));
         dispatch(userAction.setUser(result));
         success();
         propsHiddenModal();
+        navigate("");
       }
     } catch {
       error();
@@ -55,7 +60,7 @@ const FormLogin: React.FC<Props> = ({ propsHiddenModal }) => {
         onFinish={onFinish}
       >
         <Form.Item
-          name="account"
+          name="identifier"
           rules={[{ required: true, message: "Please input your Username!" }]}
         >
           <Input prefix={<UserOutlined />} placeholder="Username" />

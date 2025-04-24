@@ -1,7 +1,15 @@
-import { Controller, Get, HttpException, Inject, Post } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpException,
+  Inject,
+  Param,
+  Post,
+} from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Public } from 'src/common/decorators/public.decorator';
 import { catchError, lastValueFrom, throwError } from 'rxjs';
+import { handleRpcError } from 'src/common/helpers/catch-error.helper';
 
 @Controller('user')
 export class UserController {
@@ -20,6 +28,18 @@ export class UserController {
         ),
       );
       return allUsers;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  @Get(`/find-user/:id`)
+  async findUserById(@Param('id') id: string) {
+    try {
+      const user = await lastValueFrom(
+        this.userService.send('find-user', { id }).pipe(handleRpcError()),
+      );
+      return user;
     } catch (err) {
       throw err;
     }

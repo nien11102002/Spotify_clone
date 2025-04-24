@@ -29,7 +29,7 @@ const FormRegister: React.FC<Props> = ({ propsHiddenModal }) => {
   const success = () => {
     messageApi.open({
       type: "success",
-      content: "Login Success",
+      content: "Register Success",
     });
   };
 

@@ -25,11 +25,13 @@ export class AuthController {
 
     const userExists = await this.prisma.users.findFirst({
       where: {
-        OR: [{ account: identifier }],
+        account: identifier,
       },
       select: {
         id: true,
         password: true,
+        name: true,
+        account: true,
       },
     });
     if (!userExists)
@@ -48,7 +50,12 @@ export class AuthController {
 
     const tokens = this.createTokens(userExists);
 
-    return tokens;
+    return {
+      tokens,
+      userId: userExists.id,
+      userName: userExists.name,
+      account: userExists.account,
+    };
   }
 
   createTokens(userExists: TUserAccount) {
