@@ -8,7 +8,9 @@ api.interceptors.request.use((config: any) => {
   const currentUser = userLocal ? JSON.parse(userLocal) : null;
   config.headers = {
     ...config.headers,
-    Authorization: currentUser ? `Bearer ${currentUser.token}` : "",
+    Authorization: currentUser
+      ? `Bearer ${currentUser.tokens.accessToken}`
+      : "",
   };
   return config;
 });

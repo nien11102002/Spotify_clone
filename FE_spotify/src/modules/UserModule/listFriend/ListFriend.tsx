@@ -9,6 +9,7 @@ import { apiGetMessage } from "../../../apis/apiGetMessage";
 import { TypeMessage } from "../../../types/typeMessage";
 import { TypeUser } from "../../../types/typeUser";
 import moment from "moment";
+import { useModal } from "../../../globalContext/ModalContext";
 
 interface ContentMessage {
   message: TypeMessage[]; // Định nghĩa là một mảng các TypeMessage
@@ -18,6 +19,23 @@ interface ContentMessage {
 const SOCKET_URL = "http://localhost:8080";
 
 const ListFriend: React.FC = () => {
+  const { openModal } = useModal();
+  const userLocal = localStorage.getItem("user");
+  const isLoggedIn = !!userLocal;
+
+  // If not logged in, only render the button and open login modal on click
+  if (!isLoggedIn) {
+    return (
+      <Button
+        className="btn-show-listFriend mb-1"
+        type="primary"
+        onClick={() => openModal("login")}
+      >
+        <i className="fa-solid fa-user-group"></i>
+      </Button>
+    );
+  }
+
   const { currentUser } = useAppSelector((state) => state.currentUser);
   const [open, setOpen] = useState(false);
   const [openMessageBox, setOpenMessageBox] = useState(false);
@@ -34,6 +52,7 @@ const ListFriend: React.FC = () => {
   const { friendLists } = useAppSelector((state) => state.friend);
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const accessToken = user?.tokens.accessToken;
 
   socketRef.current = io(SOCKET_URL, {
     path: "/socket",
@@ -45,8 +64,8 @@ const ListFriend: React.FC = () => {
     timeout: 20000, // Thời gian chờ kết nối (tăng thời gian nếu cần)
     autoConnect: true,
     auth: {
-      token: user?.tokens.accessToken,
-    }, // Tự động kết nối khi khởi tạo
+      token: accessToken || "",
+    },
   });
   // show drawer
   const showDrawer = (data?: any) => {

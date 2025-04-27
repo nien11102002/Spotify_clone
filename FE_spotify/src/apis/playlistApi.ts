@@ -45,32 +45,34 @@ const playlistApi = {
 
   // 2. Lấy danh sách playlist của một người dùng cụ thể
   getPlaylistOfUser: (userId: number) => {
-    return api.get<GetPlaylistsResponse>(`/get-playlists-of-user?id=${userId}`);
+    return api.get<GetPlaylistsResponse>(
+      `/playlist/get-playlists-of-user?id=${userId}`
+    );
   },
 
   // 3. Tạo một playlist mới
   createPlaylist: (data: CreatePlayListDto) => {
-    return api.post("/add-playlist", data);
+    return api.post("/playlist/add-playlist", data);
   },
 
   // 4. Thêm bài hát vào một playlist
   addSongToPlaylist: (data: AddSongsToPlaylistDto) => {
-    return api.post("/add-song-to-playlist", data);
+    return api.post("/playlist/add-song-to-playlist", data);
   },
 
   // 5. Lấy chi tiết các bài hát trong một playlist
   getSongInPlaylist: (playlistId: number) => {
-    return api.get(`/get-song-in-playlist/${playlistId}`);
+    return api.get(`/playlist/get-song-in-playlist/${playlistId}`);
   },
 
   // 6. Chỉnh sửa một playlist
   editPlaylist: (playlistId: number, data: UpdatePlayListDto) => {
-    return api.put(`/edit-playlist/${playlistId}`, data);
+    return api.put(`/playlist/edit-playlist/${playlistId}`, data);
   },
 
   // 7. Xóa một playlist
   deletePlaylist: (playlistId: number) => {
-    return api.delete(`/remove-playlist/${playlistId}`);
+    return api.delete(`/playlist/remove-playlist/${playlistId}`);
   },
 };
 
