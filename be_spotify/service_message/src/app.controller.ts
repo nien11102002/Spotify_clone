@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 import { PrismaService } from './prisma/prisma.service';
 
 @Controller()
@@ -18,5 +18,18 @@ export class AppController {
       orderBy: { created_at: 'desc' },
     });
     return messageList;
+  }
+
+  @EventPattern('new-message')
+  async newMessage(@Payload() data: any) {
+    const { idSender, contentMess, roomChat, timeSend } = data.body;
+    const message = await this.prisma.messages.create({
+      data: {
+        sender_id: idSender,
+        message: contentMess,
+        room_chat: roomChat,
+      },
+    });
+    return message;
   }
 }

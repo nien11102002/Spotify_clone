@@ -1,4 +1,5 @@
 import { Inject } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { ClientProxy } from '@nestjs/microservices';
 import {
@@ -9,7 +10,8 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { MysqlPrismaService } from 'src/prisma/mysql.prisma/mysql.prisma.service';
+import { TUser } from 'src/common/types/types';
+import { PostgresqlPrismaService } from 'src/prisma/postgresql.prisma/postgresql.prisma.service';
 
 interface TypeMessage {
   idSender: number;
@@ -25,30 +27,41 @@ export class SocketGateway {
 
   constructor(
     private jwtService: JwtService,
-    private prisma: MysqlPrismaService,
+    private configService: ConfigService,
+    private prisma: PostgresqlPrismaService,
     @Inject('MESSAGE_NAME') private messageService: ClientProxy,
   ) {}
 
-  handleConnection(client: Socket) {
+  async handleConnection(client: Socket) {
     const token = client.handshake.auth.token;
 
     try {
-      const payload = this.jwtService.verify(token);
-      (client as any).user = payload;
+      const payload = this.jwtService.verify(token, {
+        secret: this.configService.get<string>('ACCESS_TOKEN_SECRET'),
+      });
+
+      const user: TUser = await this.prisma.users.findUnique({
+        where: { id: Number(payload.user_id) },
+        select: {
+          account: true,
+          id: true,
+          name: true,
+          avatar: true,
+          banner: true,
+          description: true,
+          refresh_token: true,
+          role: true,
+        },
+      });
+
+      (client as any).user = user;
+      console.log('Client connected', { userId: user.id });
     } catch (err) {
       console.log('Invalid token');
       client.disconnect();
     }
   }
 
-  // @SubscribeMessage('join-room-message')
-  // handleJoinRoomMessage(
-  //   @MessageBody() body: any,
-  //   @ConnectedSocket() client: Socket,
-  // ): void {
-  //   client.join(body);
-  //   console.log(`Client ${client.id} joined room `);
-  // }
   @SubscribeMessage('message')
   handleMessage(
     @MessageBody() body: TypeMessage,
@@ -59,7 +72,7 @@ export class SocketGateway {
     });
     client.join(body.roomChat);
 
-    client.to(body.roomChat).emit('message', { message: body });
+    client.to(body.roomChat).emit('message', body);
 
     this.messageService.emit('new-message', { body });
   }

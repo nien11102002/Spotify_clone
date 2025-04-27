@@ -16,7 +16,7 @@ export class AuthController {
   @Public()
   @Post(`/login`)
   async login(@Body() loginDto: LoginDto) {
-    console.log(loginDto);
+    console.log('API login called', { loginDto });
     try {
       const loginUser = await lastValueFrom(
         this.userService.send('login', loginDto).pipe(
@@ -35,6 +35,7 @@ export class AuthController {
   @Public()
   @Post(`/register`)
   async register(@Body() registerDto: RegisterDto) {
+    console.log('API register called', { registerDto });
     try {
       let registerUser = await lastValueFrom(
         this.userService.send('register', registerDto).pipe(

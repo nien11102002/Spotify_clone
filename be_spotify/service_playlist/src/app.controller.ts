@@ -21,7 +21,7 @@ export class AppController {
   @MessagePattern('get-playlists-of-user')
   async getPlaylistOfUser(@Payload() data) {
     const id = +data.id;
-
+    console.log({ id });
     const existUser = await this.prisma.users.findUnique({
       where: { id: id },
     });
