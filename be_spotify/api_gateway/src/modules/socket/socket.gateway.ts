@@ -67,7 +67,9 @@ export class SocketGateway {
     @MessageBody() body: TypeMessage,
     @ConnectedSocket() client: Socket,
   ): void {
-    console.log('message', body);
+    console.log(
+      `Client ${client.id} is connected to the room: ${body.roomChat}`,
+    );
     client.rooms.forEach((roomId) => {
       client.leave(roomId);
     });

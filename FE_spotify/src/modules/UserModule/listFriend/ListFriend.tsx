@@ -13,7 +13,7 @@ import { useModal } from "../../../globalContext/ModalContext";
 
 interface ContentMessage {
   message: TypeMessage[]; // Định nghĩa là một mảng các TypeMessage
-  sender?: TypeUser;
+  senderId?: number;
 }
 
 const SOCKET_URL = "http://localhost:8080";
@@ -54,19 +54,12 @@ const ListFriend: React.FC = () => {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const accessToken = user?.tokens.accessToken;
 
-  // socketRef.current = io(SOCKET_URL, {
-  //   path: "/socket",
-  //   transports: ["websocket"],
-  //   reconnection: true, // Cho phép tự động kết nối lại
-  //   reconnectionAttempts: Infinity, // Số lần thử kết nối lại
-  //   reconnectionDelay: 1000, // Thời gian chờ giữa các lần thử kết nối lại
-  //   secure: false, // Đặt thành false nếu bạn không sử dụng HTTPS
-  //   timeout: 20000, // Thời gian chờ kết nối (tăng thời gian nếu cần)
-  //   autoConnect: true,
-  //   auth: {
-  //     token: accessToken || "",
-  //   },
-  // });
+  const roomChatRef = useRef<string>("");
+
+  // whenever roomChat changes, update the ref:
+  useEffect(() => {
+    roomChatRef.current = roomChat;
+  }, [roomChat]);
 
   // show drawer
   const showDrawer = (data?: any) => {
@@ -172,25 +165,29 @@ const ListFriend: React.FC = () => {
       });
 
       socketRef.current.on("message", (newMessage: TypeMessage) => {
-        if (newMessage.roomChat === roomChat) {
-          setContentMessages((prevMessages) => {
-            if (prevMessages) {
-              return {
-                ...prevMessages,
-                message: [...prevMessages.message, newMessage],
-              };
-            } else {
-              return {
-                message: [newMessage],
-                sender: currentUser.userId,
-              };
-            }
-          });
+        if (newMessage.idSender !== currentUser.userId) {
+          if (newMessage.roomChat === roomChatRef.current) {
+            setContentMessages((prevMessages) => {
+              if (prevMessages) {
+                return {
+                  ...prevMessages,
+                  message: [...prevMessages.message, newMessage],
+                };
+              } else {
+                return {
+                  message: [newMessage],
+                  sender: currentUser.userId,
+                };
+              }
+            });
+            console.log(contentMessages);
+          }
         }
       });
     }
 
     return () => {
+      socketRef.current?.off("connect");
       socketRef.current?.disconnect();
     };
   }, []);
@@ -244,23 +241,21 @@ const ListFriend: React.FC = () => {
 
   const handleShowMessage = () => {
     if (contentMessages) {
+      console.log("contentMessages", contentMessages);
       return contentMessages.message.map((message: TypeMessage, index) => {
         const date = moment(message.timeSend).format("DD/MM/YYYY HH:mm:ss");
         return (
-          <>
-            <div
-              key={index}
-              className={`message-item my-2 p-2 max-w-xs rounded-lg w-3/6 ${
-                message.idSender === currentUser.userId
-                  ? "ml-auto bg-blue-500 text-white"
-                  : "mr-auto bg-white text-black"
-              }`}
-            >
-              {message.contentMess}
-              <p className="contentMessage text-xs mt-2">{date}</p>
-            </div>
-            <div ref={chatEndRef} />
-          </>
+          <div
+            key={index}
+            className={`message-item my-2 p-2 max-w-xs rounded-lg w-3/6 ${
+              message.idSender === currentUser.userId
+                ? "ml-auto bg-blue-500 text-white"
+                : "mr-auto bg-white text-black"
+            }`}
+          >
+            {message.contentMess}
+            <p className="contentMessage text-xs mt-2">{date}</p>
+          </div>
         );
       });
     }
@@ -317,7 +312,10 @@ const ListFriend: React.FC = () => {
                 Chat with {chatWith.User_ListFriends_friendIdToUser?.name}
               </h2>
             </div>
-            <div className="message-list">{handleShowMessage()}</div>
+            <div className="message-list">
+              {handleShowMessage()}
+              <div ref={chatEndRef} />
+            </div>
             <MessageInput onSend={handleSendMessage} />
           </div>
         )}

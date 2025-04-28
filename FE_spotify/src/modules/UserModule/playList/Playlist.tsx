@@ -135,7 +135,6 @@ const PlaylistComponent = () => {
       setIsModalVisible(true);
     } else if (e.key === "delete") {
       const result = await dispatch(deletePlaylist(playListDetailById.id));
-      console.log({ result });
       if (result.statusCode === 200) {
         console.log("navigate");
         // Assuming success is indicated by statusCode 200

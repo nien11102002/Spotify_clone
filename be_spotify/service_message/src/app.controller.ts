@@ -2,6 +2,7 @@ import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 import { PrismaService } from './prisma/prisma.service';
+import { send } from 'process';
 
 @Controller()
 export class AppController {
@@ -15,7 +16,7 @@ export class AppController {
       where: {
         room_chat: roomChat,
       },
-      orderBy: { created_at: 'desc' },
+      orderBy: { created_at: 'asc' },
     });
 
     console.log('messageList', messageList);
