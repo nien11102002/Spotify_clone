@@ -48,7 +48,7 @@ export class PlaylistController {
 
   @Public()
   @Get('get-playlist-detail/:id')
-  async getPlaylistDetail(@Param() id: string) {
+  async getPlaylistDetail(@Param('id') id: string) {
     console.log('API get-playlist-detail called', { id });
     const userPlaylist = await lastValueFrom(
       this.playlistService
@@ -86,7 +86,7 @@ export class PlaylistController {
     console.log('API add-song-to-playlist called', { addSongToPlaylistDto });
     const result = await lastValueFrom(
       this.playlistService
-        .send('add_song_to_playlist', {
+        .send('add-song-to-playlist', {
           addSongToPlaylistDto,
         })
         .pipe(handleRpcError()),
@@ -100,7 +100,7 @@ export class PlaylistController {
     console.log('API create-playlist called', { createPlaylistDto });
     const newPlaylist = await lastValueFrom(
       this.playlistService
-        .send('create_playlist', { createPlaylistDto })
+        .send('create-playlist', { createPlaylistDto })
         .pipe(handleRpcError()),
     );
 

@@ -15,7 +15,6 @@ export default function Sidebar() {
   const { openModal, openPopover, togglePopover } = useModal();
   const navigate = useNavigate();
   const { currentUser } = useAppSelector((state) => state.currentUser);
-  console.log(currentUser);
 
   const dispatch = useDispatch<AppDispatch>();
   const playlists = useAppSelector((state) => state.playlist.playLists);
@@ -31,7 +30,7 @@ export default function Sidebar() {
 
   const handleCreatePlayList = async () => {
     const newPlaylist: TypePlaylistPost = {
-      userId: currentUser.user.userId,
+      userId: currentUser.userId,
       imagePath:
         "https://images.macrumors.com/t/hi1_a2IdFGRGMsJ0x31SdD_IcRk=/1600x/article-new/2018/05/apple-music-note.jpg",
       playlistName: `Danh sách phát của tôi #${playlistCount + 1}`,
@@ -41,7 +40,7 @@ export default function Sidebar() {
     const result = await dispatch(createPlayList(newPlaylist));
     if (result) {
       navigate(`/play-list/${result.id}`);
-      dispatch(getPlaylistByUser(currentUser?.user.userId));
+      dispatch(getPlaylistByUser(currentUser?.userId));
     } else {
       console.log("Failed to create playlist.");
     }
@@ -180,7 +179,7 @@ export default function Sidebar() {
                                 lineHeight: "1",
                               }}
                             >
-                              Danh sách phát • {currentUser.user?.name}
+                              Danh sách phát • {currentUser.userName}
                             </Text>
                           </Space>
                         </Col>

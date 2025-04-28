@@ -13,8 +13,8 @@ export class AppController {
 
   @EventPattern('add-friend')
   async addFriend(@Payload() data) {
-    const { userId, friendId, roomChatId } = data;
-    console.log({ userId, friendId, roomChatId });
+    const { userId, friendId, roomChat } = data;
+    console.log({ userId, friendId, roomChat });
 
     const existingFriendship = await this.prisma.friend_list.findFirst({
       where: {
@@ -37,12 +37,12 @@ export class AppController {
         {
           user_id: userId,
           friend_id: friendId,
-          room_chat: roomChatId,
+          room_chat: roomChat,
         },
         {
           user_id: friendId,
           friend_id: userId,
-          room_chat: roomChatId,
+          room_chat: roomChat,
         },
       ],
     });

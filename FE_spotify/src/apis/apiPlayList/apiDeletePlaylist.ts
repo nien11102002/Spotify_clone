@@ -6,7 +6,7 @@ export const deletePlaylist = (data: any) => async (dispatch: AppDispatch) => {
   try {
     const response = await api.delete(`/playlist/remove-playlist/${data}`);
     dispatch(playlistAction.getPlaylistDetailById(response.data.content));
-    return response.data.content;
+    return response.data;
   } catch (error) {
     console.error("Error creating playlist:", error);
     return undefined;

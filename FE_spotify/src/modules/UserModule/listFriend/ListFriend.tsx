@@ -54,26 +54,27 @@ const ListFriend: React.FC = () => {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const accessToken = user?.tokens.accessToken;
 
-  socketRef.current = io(SOCKET_URL, {
-    path: "/socket",
-    transports: ["websocket"],
-    reconnection: true, // Cho phép tự động kết nối lại
-    reconnectionAttempts: Infinity, // Số lần thử kết nối lại
-    reconnectionDelay: 1000, // Thời gian chờ giữa các lần thử kết nối lại
-    secure: false, // Đặt thành false nếu bạn không sử dụng HTTPS
-    timeout: 20000, // Thời gian chờ kết nối (tăng thời gian nếu cần)
-    autoConnect: true,
-    auth: {
-      token: accessToken || "",
-    },
-  });
+  // socketRef.current = io(SOCKET_URL, {
+  //   path: "/socket",
+  //   transports: ["websocket"],
+  //   reconnection: true, // Cho phép tự động kết nối lại
+  //   reconnectionAttempts: Infinity, // Số lần thử kết nối lại
+  //   reconnectionDelay: 1000, // Thời gian chờ giữa các lần thử kết nối lại
+  //   secure: false, // Đặt thành false nếu bạn không sử dụng HTTPS
+  //   timeout: 20000, // Thời gian chờ kết nối (tăng thời gian nếu cần)
+  //   autoConnect: true,
+  //   auth: {
+  //     token: accessToken || "",
+  //   },
+  // });
+
   // show drawer
   const showDrawer = (data?: any) => {
     setOpen(!open);
     if (data) {
       setChatWith(data);
       setOpenMessageBox(true);
-      createRoomChat(currentUser.user.userId, data.friendId);
+      createRoomChat(currentUser.userId, data.friendId);
     }
   };
 
@@ -86,6 +87,7 @@ const ListFriend: React.FC = () => {
   const callApiGetMessage = async () => {
     if (roomChat) {
       const result = await apiGetMessage(roomChat);
+      console.log("result", result);
       setContentMessages(result);
     }
   };
@@ -145,61 +147,88 @@ const ListFriend: React.FC = () => {
   };
 
   useEffect(() => {
-    if (socketRef.current) {
+    if (!socketRef.current) {
+      socketRef.current = io(SOCKET_URL, {
+        path: "/socket",
+        transports: ["websocket"],
+        reconnection: true,
+        reconnectionAttempts: Infinity,
+        reconnectionDelay: 1000,
+        secure: false,
+        timeout: 20000,
+        autoConnect: true,
+        auth: {
+          token: accessToken || "",
+        },
+      });
+
       socketRef.current.on("connect", () => {
         console.log("Socket connected successfully!");
-        setTimeout(() => {
-          console.log("Socket ID:", socketRef.current?.id); // Kiểm tra lại ID sau khi kết nối thành công
-        }, 100); // Đặt độ trễ 100ms trước khi kiểm tra ID
       });
-      socketRef.current.on("message", (newMessage) => {
-        setContentMessages((prevMessages) => {
-          if (prevMessages) {
-            return {
-              ...prevMessages,
-              message: [...prevMessages.message, newMessage],
-            };
-          } else {
-            return {
-              message: [newMessage],
-              sender: currentUser.user.userId,
-            };
-          }
-        });
-      });
-      // Xử lý khi socket bị ngắt kết nối
+
       socketRef.current.on("disconnect", () => {
-        console.log("Socket disconnected");
+        console.log("Socket disconnected, trying to reconnect...");
+        socketRef.current?.connect();
       });
-      return () => {
-        socketRef.current?.disconnect();
-      };
+
+      socketRef.current.on("message", (newMessage: TypeMessage) => {
+        if (newMessage.roomChat === roomChat) {
+          setContentMessages((prevMessages) => {
+            if (prevMessages) {
+              return {
+                ...prevMessages,
+                message: [...prevMessages.message, newMessage],
+              };
+            } else {
+              return {
+                message: [newMessage],
+                sender: currentUser.userId,
+              };
+            }
+          });
+        }
+      });
     }
+
+    return () => {
+      socketRef.current?.disconnect();
+    };
   }, []);
 
   const handleSendMessage = (content: string) => {
-    if (socketRef.current) {
-      if (!socketRef.current.connected) {
-        socketRef.current.connect();
-        return;
-      }
-      const date = new Date();
-      if (!socketRef.current.connected) {
-        console.log("connect false");
-        return;
-      }
-      if (chatWith) {
-        const newMessage: TypeMessage = {
-          idSender: currentUser.user.userId,
-          timeSend: date,
-          contentMess: content,
-          roomChat: roomChat,
-        };
+    if (!socketRef.current || !socketRef.current.connected) {
+      console.error("Socket is not connected yet!");
+      return;
+    }
 
-        socketRef.current.emit("message", newMessage, (response: any) => {
-          console.log("message send success", response);
-        }); // Gửi tin nhắn qua socket
-      }
+    const date = new Date();
+    if (chatWith) {
+      const newMessage: TypeMessage = {
+        idSender: currentUser.userId,
+        timeSend: date,
+        contentMess: content,
+        roomChat: roomChat,
+      };
+
+      // Optimistically update the UI
+      setContentMessages((prevMessages) => {
+        if (prevMessages) {
+          return {
+            ...prevMessages,
+            message: [...prevMessages.message, newMessage],
+          };
+        } else {
+          return {
+            message: [newMessage],
+            sender: currentUser.userId,
+          };
+        }
+      });
+
+      // Emit the message to the server
+      socketRef.current.emit("message", newMessage, (response: any) => {
+        console.log("message send success", response);
+      });
     }
   };
   // handler scroll when open message box
@@ -222,7 +251,7 @@ const ListFriend: React.FC = () => {
             <div
               key={index}
               className={`message-item my-2 p-2 max-w-xs rounded-lg w-3/6 ${
-                message.idSender === currentUser.user.userId
+                message.idSender === currentUser.userId
                   ? "ml-auto bg-blue-500 text-white"
                   : "mr-auto bg-white text-black"
               }`}

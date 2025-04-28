@@ -4,7 +4,7 @@ import api from "./../apiUtil";
 
 export const addFriend = (data: any) => async (dispatch: AppDispatch) => {
   try {
-    const response = await api.post("/friend/add-friends", data);
+    const response = await api.post("/friend/add-friend", data);
     dispatch(friendAction.setFriendList(response.data.content));
     return response.data.content;
   } catch (error) {

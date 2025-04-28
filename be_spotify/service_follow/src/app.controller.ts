@@ -19,13 +19,21 @@ export class AppController {
       },
     });
 
-    return isFollowing;
+    const formatReturn = {
+      isFollowing: isFollowing ? true : false,
+      userId: userId,
+      followingUserId: followingUserId,
+    };
+    return formatReturn;
   }
 
   @MessagePattern('send-follow')
   async sendFollow(@Payload() data) {
-    const userId = +data.userId;
-    const followingUserId = +data.followingUserId;
+    const userId = +data.followDto.userId;
+    const followingUserId = +data.followDto.followingId;
+
+    console.log({ userId, followingUserId });
+
     const isFollowing = await this.prisma.follow_list.findFirst({
       where: {
         user_id: userId,
@@ -50,8 +58,9 @@ export class AppController {
 
   @MessagePattern('unfollow')
   async unfollow(@Payload() data) {
-    const userId = +data.userId;
-    const followingUserId = +data.followingUserId;
+    const userId = +data.followDto.userId;
+    const followingUserId = +data.followDto.followingId;
+
     const isFollowing = await this.prisma.follow_list.findFirst({
       where: {
         user_id: userId,

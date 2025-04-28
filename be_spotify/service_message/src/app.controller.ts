@@ -17,7 +17,21 @@ export class AppController {
       },
       orderBy: { created_at: 'desc' },
     });
-    return messageList;
+
+    console.log('messageList', messageList);
+
+    const formatReturn = {
+      message: messageList.map((message) => {
+        return {
+          idSender: message.sender_id,
+          contentMess: message.message,
+          timeSend: message.created_at,
+          roomChat: message.room_chat,
+        };
+      }),
+    };
+
+    return formatReturn;
   }
 
   @EventPattern('new-message')

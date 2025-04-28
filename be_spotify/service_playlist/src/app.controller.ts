@@ -21,7 +21,7 @@ export class AppController {
   @MessagePattern('get-playlists-of-user')
   async getPlaylistOfUser(@Payload() data) {
     const id = +data.id;
-    console.log({ id });
+    console.log('API get-playlists-of-user called', { id });
     const existUser = await this.prisma.users.findUnique({
       where: { id: id },
     });
@@ -55,11 +55,12 @@ export class AppController {
   @MessagePattern('get-playlist-detail')
   async getPlaylistDetail(@Payload() data) {
     const id = +data.id;
+    console.log('API get-playlist-detail called', { id });
 
     const existPlaylist = await this.prisma.playlists.findUnique({
       where: { id: id },
       include: {
-        playlist_songs: true,
+        playlist_songs: { include: { songs: true } },
       },
     });
 
@@ -70,7 +71,31 @@ export class AppController {
       });
     }
 
-    return existPlaylist;
+    const formatReturn = {
+      id: existPlaylist.id,
+      playlistName: existPlaylist.playlist_name,
+      description: existPlaylist.description,
+      imagePath: existPlaylist.image_path,
+      userId: existPlaylist.user_id,
+      createDate: existPlaylist.create_date,
+      updatedAt: existPlaylist.updated_at,
+      PlaylistSongs: existPlaylist.playlist_songs.map((song) => {
+        return {
+          songId: song.song_id,
+          Song: {
+            songId: song.song_id,
+            songName: song.songs.song_name,
+            genreId: song.songs.genre_id,
+            publicDate: song.songs.public_date,
+            duration: song.songs.duration,
+            songImage: song.songs.song_image,
+            userId: song.songs.user_id,
+          },
+        };
+      }),
+    };
+
+    return formatReturn;
   }
 
   @MessagePattern('get-song-in-playlist')
@@ -134,6 +159,17 @@ export class AppController {
       where: { id: +playlistId },
     });
 
+    const existSongInPlaylist = await this.prisma.playlist_songs.findFirst({
+      where: { playlist_id: +playlistId, song_id: +songId },
+    });
+
+    if (existSongInPlaylist) {
+      throw new RpcException({
+        statusCode: 400,
+        message: 'Song already exists in playlist',
+      });
+    }
+
     if (!existPlaylist) {
       throw new RpcException({
         statusCode: 404,
@@ -172,7 +208,7 @@ export class AppController {
     });
 
     const existedPlaylist = await this.prisma.playlists.findFirst({
-      where: { playlist_name: playlistName, user_id: userId },
+      where: { playlist_name: playlistName, user_id: +userId },
     });
 
     if (!existUser) {
@@ -229,7 +265,7 @@ export class AppController {
     return updatedPlaylist;
   }
 
-  @MessagePattern('delete-playlist')
+  @MessagePattern('remove-playlist')
   async deletePlaylist(@Payload() data) {
     const { id } = data;
 
@@ -243,6 +279,10 @@ export class AppController {
         message: 'Playlist not found',
       });
     }
+
+    await this.prisma.playlist_songs.deleteMany({
+      where: { playlist_id: +id },
+    });
 
     await this.prisma.playlists.delete({
       where: { id: +id },

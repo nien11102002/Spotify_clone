@@ -1,7 +1,18 @@
-import { Controller, Delete, Get, Inject, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { send } from 'process';
 import { lastValueFrom } from 'rxjs';
+import { FollowDto } from './dto/follow.dto';
 
 @ApiBearerAuth()
 @Controller('follow')
@@ -10,8 +21,8 @@ export class FollowController {
 
   @Get('is-following')
   async isFollowing(
-    @Param('userId') userId: string,
-    @Param('followingUserId') followingUserId: string,
+    @Query('userId') userId: string,
+    @Query('followingUserId') followingUserId: string,
   ) {
     console.log('API isFollowing called', { userId, followingUserId });
     const isFollowing = await lastValueFrom(
@@ -21,25 +32,19 @@ export class FollowController {
   }
 
   @Post('send-follow')
-  async sendFollow(
-    @Param('userId') userId: string,
-    @Param('followingUserId') followingUserId: string,
-  ) {
-    console.log('API sendFollow called', { userId, followingUserId });
+  async sendFollow(@Body() followDto: FollowDto) {
+    console.log('API sendFollow called', { followDto });
     const isFollowing = await lastValueFrom(
-      this.followService.send('send-follow', { userId, followingUserId }),
+      this.followService.send('send-follow', { followDto }),
     );
     return isFollowing;
   }
 
   @Delete('unfollow')
-  async unfollow(
-    @Param('userId') userId: string,
-    @Param('followingUserId') followingUserId: string,
-  ) {
-    console.log('API unfollow called', { userId, followingUserId });
+  async unfollow(@Body() followDto: FollowDto) {
+    console.log('API unfollow called', { followDto });
     const result = await lastValueFrom(
-      this.followService.send('unfollow', { userId, followingUserId }),
+      this.followService.send('unfollow', { followDto }),
     );
     return result;
   }

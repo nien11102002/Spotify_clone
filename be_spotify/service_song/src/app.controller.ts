@@ -47,7 +47,8 @@ export class AppController {
     const formattedGenres = genres.map((genre) => {
       return {
         genreId: genre.id,
-        genreName: genre.genre_name,
+        nameGenre: genre.genre_name,
+        createTime: genre.created_at,
       };
     });
 

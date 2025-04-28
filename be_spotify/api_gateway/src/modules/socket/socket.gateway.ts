@@ -55,7 +55,7 @@ export class SocketGateway {
       });
 
       (client as any).user = user;
-      console.log('Client connected', { userId: user.id });
+      // console.log('Client connected', { userId: user.id });
     } catch (err) {
       console.log('Invalid token');
       client.disconnect();
@@ -67,6 +67,7 @@ export class SocketGateway {
     @MessageBody() body: TypeMessage,
     @ConnectedSocket() client: Socket,
   ): void {
+    console.log('message', body);
     client.rooms.forEach((roomId) => {
       client.leave(roomId);
     });

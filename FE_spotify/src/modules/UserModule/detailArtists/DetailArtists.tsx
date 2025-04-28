@@ -11,10 +11,7 @@ import { useAppSelector } from "../../../redux/hooks";
 import { apiSendFollow } from "../../../apis/apiSendFollow";
 import { apiUnfollow } from "../../../apis/apiUnfollow";
 import { Button } from "antd";
-import {
-  UserAddOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import { UserAddOutlined, UserOutlined } from "@ant-design/icons";
 
 import { addFriend } from "../../../apis/apiListFriend/apiAddFriend";
 import { useDispatch } from "react-redux";
@@ -42,7 +39,8 @@ export default function DetailArtists() {
 
   const apiCheckFollow = async () => {
     if (currentUser) {
-      const result = await apiGetFollow(currentUser.user.userId, id);
+      console.log({ currentUser, id });
+      const result = await apiGetFollow(currentUser.userId, id);
       isFollow(result.isFollowing);
     }
   };
@@ -101,7 +99,7 @@ export default function DetailArtists() {
   };
 
   const callApiSendFollow = async (id: number) => {
-    const { userId } = currentUser.user;
+    const userId = currentUser.userId;
     const result = await apiSendFollow({ userId, followingId: id });
     if (result) {
       isFollow(true);
@@ -109,35 +107,38 @@ export default function DetailArtists() {
   };
 
   const callApiUnFollow = async (id: number) => {
-    const { userId } = currentUser.user;
+    const userId = currentUser.userId;
     const result = await apiUnfollow({ userId, followingId: id });
     if (result) {
       isFollow(false);
     }
   };
 
-  const handleAddFriend = async() => {
-    if (currentUser.user.userId === id) {
+  const handleAddFriend = async () => {
+    if (currentUser.userId === id) {
       return;
     }
+    const userIdNum = Number(currentUser.userId);
+    const friendIdNum = Number(id);
+    const sortedIds = [userIdNum, friendIdNum].sort((a, b) => a - b);
     const payload = {
-      userId: currentUser.user.userId,
-      friendId: Number(id),
-      roomChat: `${currentUser.user.userId}-${id}`,
+      userId: userIdNum,
+      friendId: friendIdNum,
+      roomChat: `${sortedIds[0]}-${sortedIds[1]}`,
     };
     await dispatch(addFriend(payload));
-    callApiGetFriend()
+    callApiGetFriend();
   };
 
-  const handleRemoveFriend = (id : string | undefined) => {
-    if(id){
-      dispatch(deleteFriend(id))
-      callApiGetFriend()
+  const handleRemoveFriend = async (id: string | undefined) => {
+    if (id) {
+      await dispatch(deleteFriend(id));
+      callApiGetFriend();
     }
-  }
+  };
 
   const callApiGetFriend = async () => {
-    const result = await apiGetFriend(currentUser.user.userId);
+    const result = await apiGetFriend(currentUser.userId);
     if (result) {
       const checkFriend = result.some(
         (friend) => friend.friendId === Number(id)
@@ -145,7 +146,6 @@ export default function DetailArtists() {
       setIsFriend(checkFriend);
     }
   };
-
 
   useEffect(() => {
     callApiDetailUser();
