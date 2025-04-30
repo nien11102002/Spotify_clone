@@ -13,12 +13,11 @@ import { useModal } from "../../../globalContext/ModalContext";
 
 interface ContentMessage {
   message: TypeMessage[]; // Định nghĩa là một mảng các TypeMessage
-  senderId?: number;
+  senderId?: TypeUser;
 }
 
-const SOCKET_URL = "http://localhost:8080";
-
 const ListFriend: React.FC = () => {
+  const SOCKET_URL = "http://localhost:8080";
   const { openModal } = useModal();
   const userLocal = localStorage.getItem("user");
   const isLoggedIn = !!userLocal;
@@ -54,6 +53,20 @@ const ListFriend: React.FC = () => {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const accessToken = user?.tokens.accessToken;
 
+  socketRef.current = io(SOCKET_URL, {
+    path: "/socket",
+    transports: ["websocket"],
+    reconnection: true,
+    reconnectionAttempts: Infinity,
+    reconnectionDelay: 1000,
+    secure: false,
+    timeout: 20000,
+    autoConnect: true,
+    auth: {
+      token: accessToken || "",
+    },
+  });
+
   const roomChatRef = useRef<string>("");
 
   // whenever roomChat changes, update the ref:
@@ -80,7 +93,7 @@ const ListFriend: React.FC = () => {
   const callApiGetMessage = async () => {
     if (roomChat) {
       const result = await apiGetMessage(roomChat);
-      console.log("result", result);
+
       setContentMessages(result);
     }
   };
@@ -241,7 +254,6 @@ const ListFriend: React.FC = () => {
 
   const handleShowMessage = () => {
     if (contentMessages) {
-      console.log("contentMessages", contentMessages);
       return contentMessages.message.map((message: TypeMessage, index) => {
         const date = moment(message.timeSend).format("DD/MM/YYYY HH:mm:ss");
         return (

@@ -9,9 +9,11 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { lastValueFrom } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { TUser } from 'src/common/types/types';
 import { PostgresqlPrismaService } from 'src/prisma/postgresql.prisma/postgresql.prisma.service';
+import { TypeComment } from './TypeComment';
 
 interface TypeMessage {
   idSender: number;
@@ -30,6 +32,7 @@ export class SocketGateway {
     private configService: ConfigService,
     private prisma: PostgresqlPrismaService,
     @Inject('MESSAGE_NAME') private messageService: ClientProxy,
+    @Inject('COMMENT_NAME') private commentService: ClientProxy,
   ) {}
 
   async handleConnection(client: Socket) {
@@ -57,7 +60,7 @@ export class SocketGateway {
       (client as any).user = user;
       // console.log('Client connected', { userId: user.id });
     } catch (err) {
-      console.log('Invalid token');
+      // console.log('Invalid token');
       client.disconnect();
     }
   }
@@ -75,17 +78,32 @@ export class SocketGateway {
     });
     client.join(body.roomChat);
 
-    client.to(body.roomChat).emit('message', body);
+    this.server.to(body.roomChat).emit('message', body);
 
     this.messageService.emit('new-message', { body });
   }
 
-  // @SubscribeMessage('new-comment')
-  // handleNewComment(
-  //   @MessageBody() payload: { songId: string; comment: string },
-  //   @ConnectedSocket() client: Socket,
-  // ): void {
-  //   const { songId, comment } = payload;
-  //   this.server.to(songId).emit('new-comment', comment);
-  // }
+  @SubscribeMessage('comment')
+  async handleNewComment(
+    @MessageBody() payload: TypeComment,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const { songId } = payload;
+    console.log(
+      `Client ${client.id} is connected to the Song comment: ${payload.songId}`,
+    );
+    client.rooms.forEach((room) => {
+      client.leave(room);
+    });
+    client.join(String(songId));
+    console.log({ client });
+
+    const newComment = await lastValueFrom(
+      this.commentService.send('new-comment', { payload }),
+    );
+
+    console.log('New comment created', { newComment });
+
+    this.server.to(String(songId)).emit('comment', newComment);
+  }
 }

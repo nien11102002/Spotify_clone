@@ -4,6 +4,7 @@ import api from "./apiUtil";
 
 export const apiPlayMusic = async (id: any) => {
   try {
+    console.log("apiPlayMusic", id);
     const response = await api.get<ResponseApi<TypeSong>>(
       `/song/play-music/${id}`
     );

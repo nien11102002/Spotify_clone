@@ -4,20 +4,28 @@ import { Button, Form, Input, message } from "antd";
 import { apiLogin } from "../apis/apiLogin";
 import { useAppDispatch } from "../redux/hooks";
 import { userAction } from "../redux/slice/user.slice";
+import { apiRegister } from "../apis/apiRegister";
+import { useNavigate } from "react-router-dom";
+import { useModal } from "../globalContext/ModalContext";
 interface Props {
   propsHiddenModal: () => void;
 }
 const FormRegister: React.FC<Props> = ({ propsHiddenModal }) => {
+  const navigate = useNavigate();
+
+  const { openModal } = useModal();
+
   const dispatch = useAppDispatch();
   const onFinish = async (values: any) => {
     try {
-      const result = await apiLogin(values);
+      const result = await apiRegister(values);
 
       if (result) {
         localStorage.setItem("user", JSON.stringify(result));
         dispatch(userAction.setUser(result));
         success();
         propsHiddenModal();
+        navigate("");
       }
     } catch {
       error();
@@ -39,6 +47,11 @@ const FormRegister: React.FC<Props> = ({ propsHiddenModal }) => {
       content: "Account Or Password Is Incorrect",
     });
   };
+
+  const handleSwitchLogin = () => {
+    openModal("login");
+  };
+
   return (
     <>
       {contextHolder}
@@ -64,11 +77,21 @@ const FormRegister: React.FC<Props> = ({ propsHiddenModal }) => {
             placeholder="Password"
           />
         </Form.Item>
+        <Form.Item
+          name="repassword"
+          rules={[{ required: true, message: "Please input your Password!" }]}
+        >
+          <Input
+            prefix={<LockOutlined />}
+            type="password"
+            placeholder="Enter Password Again"
+          />
+        </Form.Item>
         <Form.Item>
           <Button block type="primary" htmlType="submit">
             Log in
           </Button>
-          or <a href="">Login now!</a>
+          or <a onClick={handleSwitchLogin}>Login!</a>
         </Form.Item>
       </Form>
     </>

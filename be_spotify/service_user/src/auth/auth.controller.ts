@@ -32,6 +32,12 @@ export class AuthController {
         password: true,
         name: true,
         account: true,
+        nationality: true,
+        channel_name: true,
+        avatar: true,
+        description: true,
+        banner: true,
+        role: true,
       },
     });
     if (!userExists)
@@ -53,8 +59,13 @@ export class AuthController {
     return {
       tokens,
       userId: userExists.id,
-      userName: userExists.name,
-      account: userExists.account,
+      name: userExists.name,
+      nationality: userExists.nationality,
+      channelName: userExists.channel_name,
+      avatar: userExists.avatar,
+      description: userExists.description,
+      banner: userExists.banner,
+      role: userExists.role,
     };
   }
 
@@ -111,11 +122,27 @@ export class AuthController {
         id: true,
         account: true,
         name: true,
+        nationality: true,
+        channel_name: true,
+        avatar: true,
+        description: true,
+        banner: true,
+        role: true,
       },
     });
 
     const tokens = this.createTokens(userNew);
 
-    return { tokens, userNew };
+    return {
+      tokens,
+      userId: userNew.id,
+      name: userNew.name,
+      nationality: userNew.nationality,
+      channelName: userNew.channel_name,
+      avatar: userNew.avatar,
+      description: userNew.description,
+      banner: userNew.banner,
+      role: userNew.role,
+    };
   }
 }
