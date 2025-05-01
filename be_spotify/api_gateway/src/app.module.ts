@@ -15,6 +15,7 @@ import { ConfigModule } from '@nestjs/config';
 import { MessageModule } from './modules/message/message.module';
 import { SongModule } from './modules/song/song.module';
 import { SocketModule } from './modules/socket/socket.module';
+import { RedisCacheModule } from './modules/redis_cache/redis_cache.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { SocketModule } from './modules/socket/socket.module';
     MessageModule,
     SongModule,
     SocketModule,
+    RedisCacheModule,
   ],
   controllers: [AppController],
   providers: [AppService, PostgresqlPrismaService, MysqlPrismaService],

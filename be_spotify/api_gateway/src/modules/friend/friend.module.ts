@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { FriendService } from './friend.service';
 import { FriendController } from './friend.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { RedisCacheModule } from '../redis_cache/redis_cache.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         },
       },
     ]),
+    RedisCacheModule,
   ],
   controllers: [FriendController],
   providers: [FriendService],

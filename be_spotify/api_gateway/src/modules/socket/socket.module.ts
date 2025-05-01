@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { JwtStrategy } from '../auth/jwt.strategy';
 import { MysqlPrismaService } from 'src/prisma/mysql.prisma/mysql.prisma.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { RedisCacheModule } from '../redis_cache/redis_cache.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         },
       },
     ]),
+    RedisCacheModule,
   ],
   providers: [
     SocketGateway,

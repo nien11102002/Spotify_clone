@@ -14,6 +14,8 @@ import { Server, Socket } from 'socket.io';
 import { TUser } from 'src/common/types/types';
 import { PostgresqlPrismaService } from 'src/prisma/postgresql.prisma/postgresql.prisma.service';
 import { TypeComment } from './TypeComment';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 interface TypeMessage {
   idSender: number;
@@ -33,6 +35,7 @@ export class SocketGateway {
     private prisma: PostgresqlPrismaService,
     @Inject('MESSAGE_NAME') private messageService: ClientProxy,
     @Inject('COMMENT_NAME') private commentService: ClientProxy,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async handleConnection(client: Socket) {
@@ -80,6 +83,8 @@ export class SocketGateway {
 
     this.server.to(body.roomChat).emit('message', body);
 
+    this.cacheManager.del(`message_${body.roomChat}`);
+
     this.messageService.emit('new-message', { body });
   }
 
@@ -101,7 +106,7 @@ export class SocketGateway {
     const newComment = await lastValueFrom(
       this.commentService.send('new-comment', { payload }),
     );
-
+    this.cacheManager.del(`discuss_${songId}`);
     console.log('New comment created', { newComment });
 
     this.server.to(String(songId)).emit('comment', newComment);
