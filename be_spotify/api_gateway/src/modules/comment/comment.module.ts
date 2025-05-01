@@ -11,7 +11,7 @@ import { RedisCacheModule } from '../redis_cache/redis_cache.module';
         name: 'COMMENT_NAME',
         transport: Transport.RMQ,
         options: {
-          urls: ['amqp://admin:1234@localhost:5672'],
+          urls: ['amqp://admin:1234@some-rabbit:5672'],
           queue: 'comment_queue',
           queueOptions: {
             durable: false,

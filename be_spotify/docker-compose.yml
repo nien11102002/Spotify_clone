@@ -1,0 +1,56 @@
+version: "3"
+
+services:
+  api_gateway:
+    container_name: api_gateway
+    build: ./api_gateway
+    ports:
+      - 3030:3030
+    networks:
+      - node-network
+
+  service_comment:
+    container_name: service_comment
+    build: ./service_comment
+    networks:
+      - node-network
+
+  service_follow:
+    container_name: service_follow
+    build: ./service_follow
+    networks:
+      - node-network
+
+  service_friend:
+    container_name: service_friend
+    build: ./service_friend
+    networks:
+      - node-network
+
+  service_message:
+    container_name: service_message
+    build: ./service_message
+    networks:
+      - node-network
+
+  service_playlist:
+    container_name: service_playlist
+    build: ./service_playlist
+    networks:
+      - node-network
+
+  service_song:
+    container_name: service_song
+    build: ./service_song
+    networks:
+      - node-network
+
+  service_user:
+    container_name: service_user
+    build: ./service_user
+    networks:
+      - node-network
+
+networks:
+  node-network:
+    external: true
