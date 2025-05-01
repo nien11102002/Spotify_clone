@@ -1,0 +1,21 @@
+FROM node:20
+
+WORKDIR /root/api_gateway
+
+COPY package.json .
+
+RUN yarn config set network-timeout 3000000
+
+RUN yarn install
+
+COPY . .
+
+RUN yarn prisma generate --schema src/prisma/mysql.prisma/schema.prisma
+
+RUN yarn prisma generate --schema src/prisma/postgresql.prisma/schema.prisma
+
+RUN yarn run build
+
+EXPOSE 3030
+
+CMD ["yarn" ,"start:prod"]
