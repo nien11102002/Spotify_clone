@@ -1,6 +1,6 @@
 FROM node:20
 
-WORKDIR /root/api_gateway
+WORKDIR /root/service_comment
 
 COPY package.json .
 
@@ -10,12 +10,10 @@ RUN yarn install
 
 COPY . .
 
-RUN yarn prisma generate --schema src/prisma/mysql.prisma/schema.prisma
-
-RUN yarn prisma generate --schema src/prisma/postgresql.prisma/schema.prisma
+RUN yarn prisma generate --schema src/prisma/schema.prisma
 
 RUN yarn run build
 
-EXPOSE 3030
+EXPOSE 8080
 
 CMD ["yarn" ,"start:prod"]

@@ -14,6 +14,6 @@ RUN yarn prisma generate --schema src/prisma/schema.prisma
 
 RUN yarn run build
 
-EXPOSE 3030
+EXPOSE 8080
 
 CMD ["yarn" ,"start:prod"]

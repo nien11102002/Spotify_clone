@@ -1,11 +1,9 @@
-version: "3"
-
 services:
   api_gateway:
     container_name: api_gateway
     build: ./api_gateway
     ports:
-      - 3030:3030
+      - 8080:8080
     networks:
       - node-network
 
