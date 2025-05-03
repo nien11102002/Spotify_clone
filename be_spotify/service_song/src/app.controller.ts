@@ -18,7 +18,10 @@ export class AppController {
       index: 'song-spotify-index',
       query: {
         match: {
-          song_name: searchTerm,
+          song_name: {
+            query: searchTerm,
+            fuzziness: 'AUTO',
+          },
         },
       },
     });

@@ -9,7 +9,6 @@ import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Public()
-@ApiBearerAuth()
 @Controller('song')
 export class SongController {
   constructor(
@@ -17,6 +16,7 @@ export class SongController {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
+  @Public()
   @Get('search-song/:searchTerm')
   async searchSong(@Param('searchTerm') searchTerm: string) {
     console.log('API searchSong called', { searchTerm });
