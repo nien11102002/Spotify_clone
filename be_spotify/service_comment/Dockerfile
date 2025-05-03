@@ -4,6 +4,8 @@ WORKDIR /root/service_comment
 
 COPY package.json .
 
+RUN yarn config set registry "http://registry.npmjs.org"
+
 RUN yarn config set network-timeout 3000000
 
 RUN yarn install

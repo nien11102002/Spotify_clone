@@ -6,20 +6,26 @@ import { JwtService } from '@nestjs/jwt';
 import { PostgresqlPrismaService } from 'src/prisma/postgresql.prisma/postgresql.prisma.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { MysqlPrismaService } from 'src/prisma/mysql.prisma/mysql.prisma.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    ClientsModule.register([
+    ConfigModule,
+    ClientsModule.registerAsync([
       {
         name: 'USER_NAME',
-        transport: Transport.RMQ,
-        options: {
-          urls: ['amqp://admin:1234@some-rabbit:5672'],
-          queue: 'user_queue',
-          queueOptions: {
-            durable: false,
+        imports: [ConfigModule],
+        useFactory: async (configService: ConfigService) => ({
+          transport: Transport.RMQ,
+          options: {
+            urls: [configService.get<string>('RMQ_URL')],
+            queue: 'user_queue',
+            queueOptions: {
+              durable: false,
+            },
           },
-        },
+        }),
+        inject: [ConfigService],
       },
     ]),
   ],

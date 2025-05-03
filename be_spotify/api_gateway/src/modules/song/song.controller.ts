@@ -17,6 +17,25 @@ export class SongController {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
+  @Get('search-song/:searchTerm')
+  async searchSong(@Param('searchTerm') searchTerm: string) {
+    console.log('API searchSong called', { searchTerm });
+
+    const cacheKey = `searchSong:${searchTerm}`;
+    const cachedSongs = await this.cacheManager.get(cacheKey);
+    if (cachedSongs) return cachedSongs;
+
+    const songs = await lastValueFrom(
+      this.songService
+        .send('search-song', { searchTerm })
+        .pipe(handleRpcError()),
+    );
+
+    if (songs) this.cacheManager.set(cacheKey, songs, 300);
+
+    return songs;
+  }
+
   @Get('all-songs')
   async getAllSongs() {
     console.log('API getAllSongs called');

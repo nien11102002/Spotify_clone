@@ -2,10 +2,47 @@ import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { PrismaService } from './prisma/prisma.service';
+import { ElasticsearchService } from '@nestjs/elasticsearch';
 
 @Controller()
 export class AppController {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private elasticService: ElasticsearchService,
+  ) {}
+
+  @MessagePattern('search-song')
+  async searchSong(@Payload() data) {
+    const searchTerm = data.searchTerm;
+    const songs = await this.elasticService.search<any>({
+      index: 'song-spotify-index',
+      query: {
+        match: {
+          song_name: searchTerm,
+        },
+      },
+    });
+
+    const formattedSongs = songs.hits.hits.map((song) => {
+      return {
+        songId: song._source.song_id,
+        userId: song._source.user_id,
+        genreId: song._source.id,
+        genreName: song._source.genre_name,
+        songName: song._source.song_name,
+        viewer: song._source.viewer,
+        duration: song._source.duration,
+        popular: song._source.popular,
+        description: song._source.description,
+        songImage: song._source.song_image,
+        publicDate: song._source.public_date,
+        filePath: song._source.file_path,
+        discussQuality: song._source.discuss_quality,
+      };
+    });
+
+    return formattedSongs;
+  }
 
   @MessagePattern('all-songs')
   async getAllSongs() {
