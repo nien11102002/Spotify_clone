@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, Param } from '@nestjs/common';
+import { Controller, Get, Inject, Param, Query } from '@nestjs/common';
 import { SongService } from './song.service';
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
@@ -18,16 +18,20 @@ export class SongController {
 
   @Public()
   @Get('search-song/:searchTerm')
-  async searchSong(@Param('searchTerm') searchTerm: string) {
-    console.log('API searchSong called', { searchTerm });
+  async searchSong(
+    @Param('searchTerm') searchTerm: string,
+    @Query('page') page: string,
+    @Query('pageSize') pageSize: string,
+  ) {
+    console.log('API searchSong called', { searchTerm, page, pageSize });
 
-    const cacheKey = `searchSong:${searchTerm}`;
+    const cacheKey = `searchSong:${searchTerm}-${page}-${pageSize}`;
     const cachedSongs = await this.cacheManager.get(cacheKey);
     if (cachedSongs) return cachedSongs;
 
     const songs = await lastValueFrom(
       this.songService
-        .send('search-song', { searchTerm })
+        .send('search-song', { searchTerm, page, pageSize })
         .pipe(handleRpcError()),
     );
 

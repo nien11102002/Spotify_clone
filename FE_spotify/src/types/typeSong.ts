@@ -13,3 +13,11 @@ export interface TypeSong {
   filePath: string;
   discussQuality: number;
 }
+
+export interface TypeSongResponse {
+  data: TypeSong[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPage: number;
+}

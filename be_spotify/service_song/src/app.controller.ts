@@ -13,15 +13,29 @@ export class AppController {
 
   @MessagePattern('search-song')
   async searchSong(@Payload() data) {
+    const page = +data.page || 1;
+    const pageSize = +data.pageSize || 10;
+    const skip = (page - 1) * pageSize;
     const searchTerm = data.searchTerm;
+
     const songs = await this.elasticService.search<any>({
       index: 'song-spotify-index',
+      size: 10,
+      from: skip,
       query: {
-        match: {
+        match_phrase_prefix: {
           song_name: {
             query: searchTerm,
-            fuzziness: 'AUTO',
           },
+        },
+      },
+    });
+
+    const total = await this.prisma.songs.count({
+      where: {
+        song_name: {
+          contains: searchTerm,
+          mode: 'insensitive',
         },
       },
     });
@@ -44,7 +58,9 @@ export class AppController {
       };
     });
 
-    return formattedSongs;
+    const totalPage = Math.ceil(total / pageSize);
+
+    return { data: formattedSongs, total, page, pageSize, totalPage };
   }
 
   @MessagePattern('all-songs')

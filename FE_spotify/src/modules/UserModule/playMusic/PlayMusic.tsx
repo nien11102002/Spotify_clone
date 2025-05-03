@@ -23,6 +23,7 @@ export default function PlayMusic() {
   const { currentUser } = useAppSelector((state) => state.currentUser);
   const [isPlaying, setIsPlaying] = useState(true);
   const { idMusic } = useGlobalContext();
+  console.log("idMusic", idMusic);
   const { nameArtists } = useGlobalContext();
   const [duration, setDuration] = useState(0);
   const [dataMusic, setDataMusic] = useState<TypeSong>();

@@ -10,6 +10,6 @@ export type TypeUser = {
 };
 export enum Role {
   Admin = "admin",
-  Singer = "singer",
+  Singer = "artist",
   User = "user",
 }
