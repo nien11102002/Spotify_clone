@@ -10,6 +10,7 @@ export default function HomePage() {
   const [user, setUser] = useState<TypeUser[]>([]);
   const callApiGetUser = async () => {
     const result = await apiGetUser();
+    console.log(result);
     setUser(Array.isArray(result) ? result : [result]);
   };
   useEffect(() => {
@@ -19,7 +20,7 @@ export default function HomePage() {
   const renderArtists = () => {
     if (user) {
       return user.map((itemUser) => {
-        if (itemUser.role === "singer") {
+        if (itemUser.role === "artist") {
           return (
             <Link
               key={itemUser.userId}
