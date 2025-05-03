@@ -10,11 +10,10 @@ import { ClientProxy } from '@nestjs/microservices';
 import { Public } from 'src/common/decorators/public.decorator';
 import { catchError, lastValueFrom, throwError } from 'rxjs';
 import { handleRpcError } from 'src/common/helpers/catch-error.helper';
-import { ApiBearerAuth } from '@nestjs/swagger';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 
-@ApiBearerAuth()
+@Public()
 @Controller('user')
 export class UserController {
   constructor(
