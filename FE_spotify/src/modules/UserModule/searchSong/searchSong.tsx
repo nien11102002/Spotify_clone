@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Table } from "antd";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../../redux/store";
-import { useAppSelector } from "../../../redux/hooks";
 import { TypeSong, TypeSongResponse } from "../../../types/typeSong";
 import { TypeUser } from "../../../types/typeUser";
 import { TypeGenre } from "../../../types/typeGenre";
@@ -24,7 +23,6 @@ function SearchSong() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
-  const [totalPage, setTotalPage] = useState(0);
 
   useEffect(() => {
     dispatch(fetchAndSetSongGenre());
@@ -42,7 +40,6 @@ function SearchSong() {
     } else {
       setSearchResults([]);
       setTotal(0);
-      setTotalPage(0);
     }
   }, [dispatch, keyword, page, pageSize]);
 
@@ -60,11 +57,9 @@ function SearchSong() {
     if (result) {
       setSearchResults(Array.isArray(result.data) ? result.data : []);
       setTotal(result.total || 0);
-      setTotalPage(result.totalPage || 0);
     } else {
       setSearchResults([]);
       setTotal(0);
-      setTotalPage(0);
     }
   };
 

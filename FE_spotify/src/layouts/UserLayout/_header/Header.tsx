@@ -1,4 +1,4 @@
-import { Button, ConfigProvider } from "antd";
+import { Button } from "antd";
 import "./header.css";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../../../redux/hooks";
