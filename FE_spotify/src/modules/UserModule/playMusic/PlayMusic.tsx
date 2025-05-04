@@ -62,6 +62,12 @@ export default function PlayMusic() {
       socketRef.current = io(SOCKET_URL, {
         path: "/socket",
         transports: ["websocket"],
+        reconnection: true,
+        reconnectionAttempts: Infinity,
+        reconnectionDelay: 1000,
+        secure: false,
+        timeout: 20000,
+        autoConnect: true,
         auth: {
           token: accessToken || "",
         },

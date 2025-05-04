@@ -38,9 +38,7 @@ const ListFriend: React.FC = () => {
   const { currentUser } = useAppSelector((state) => state.currentUser);
   const [open, setOpen] = useState(false);
   const [openMessageBox, setOpenMessageBox] = useState(false);
-  const [showListFriend, isShowListFriend] = useState<
-    TypeListFriend[] | undefined
-  >([]);
+  const [showListFriend, isShowListFriend] = useState<TypeListFriend[]>([]);
   const [chatWith, setChatWith] = useState<TypeListFriend>();
   const [contentMessages, setContentMessages] = useState<
     ContentMessage | undefined
@@ -52,20 +50,6 @@ const ListFriend: React.FC = () => {
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const accessToken = user?.tokens.accessToken;
-
-  socketRef.current = io(SOCKET_URL, {
-    path: "/socket",
-    transports: ["websocket"],
-    reconnection: true,
-    reconnectionAttempts: Infinity,
-    reconnectionDelay: 1000,
-    secure: false,
-    timeout: 20000,
-    autoConnect: true,
-    auth: {
-      token: accessToken || "",
-    },
-  });
 
   const roomChatRef = useRef<string>("");
 
@@ -101,6 +85,7 @@ const ListFriend: React.FC = () => {
   // func api get ListFriend
   const callApiGetListFriend = async (id: any) => {
     const result = await apiGetFriend(id);
+
     if (result) {
       isShowListFriend(result);
     }

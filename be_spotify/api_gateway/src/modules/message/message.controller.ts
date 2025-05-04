@@ -30,7 +30,7 @@ export class MessageController {
     );
 
     if (messageList) {
-      this.cacheManager.set(cacheKey, messageList, 5 * 60);
+      this.cacheManager.set(cacheKey, messageList);
     }
 
     return messageList;

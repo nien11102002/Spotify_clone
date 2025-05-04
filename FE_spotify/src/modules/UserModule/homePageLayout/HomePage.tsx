@@ -2,15 +2,13 @@ import { Card } from "antd";
 import "./homepage.css";
 import { useEffect, useState } from "react";
 import { apiGetUser } from "../../../apis/apiGetUser";
-import { TypeUser } from "../../../types/typeUser";
 import { Link } from "react-router-dom";
 
 const { Meta } = Card;
 export default function HomePage() {
-  const [user, setUser] = useState<TypeUser[]>([]);
+  const [user, setUser] = useState<any[]>([]);
   const callApiGetUser = async () => {
     const result = await apiGetUser();
-    console.log(result);
     setUser(Array.isArray(result) ? result : [result]);
   };
   useEffect(() => {
@@ -22,10 +20,7 @@ export default function HomePage() {
       return user.map((itemUser) => {
         if (itemUser.role === "artist") {
           return (
-            <Link
-              key={itemUser.userId}
-              to={`/detail-artists/${itemUser.userId}`}
-            >
+            <Link key={itemUser.id} to={`/detail-artists/${itemUser.id}`}>
               <Card
                 className="items-artists"
                 hoverable

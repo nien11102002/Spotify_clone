@@ -42,7 +42,7 @@ export class PlaylistController {
       this.playlistService.send('get-all-playlists', {}).pipe(handleRpcError()),
     );
 
-    if (allPlaylists) this.cacheManager.set(cacheKey, allPlaylists, 300);
+    if (allPlaylists) this.cacheManager.set(cacheKey, allPlaylists);
 
     return allPlaylists;
   }
@@ -60,7 +60,7 @@ export class PlaylistController {
         .send('get-playlists-of-user', { id })
         .pipe(handleRpcError()),
     );
-    if (userPlaylist) this.cacheManager.set(cacheKey, userPlaylist, 300);
+    if (userPlaylist) this.cacheManager.set(cacheKey, userPlaylist);
     return userPlaylist;
   }
 
@@ -77,7 +77,7 @@ export class PlaylistController {
         .send('get-playlist-detail', { id })
         .pipe(handleRpcError()),
     );
-    if (userPlaylist) this.cacheManager.set(cacheKey, userPlaylist, 300);
+    if (userPlaylist) this.cacheManager.set(cacheKey, userPlaylist);
     return userPlaylist;
   }
 
@@ -94,7 +94,7 @@ export class PlaylistController {
         .send('get-song-in-playlist', { playlistId })
         .pipe(handleRpcError()),
     );
-    if (songsInPlaylist) this.cacheManager.set(cacheKey, songsInPlaylist, 300);
+    if (songsInPlaylist) this.cacheManager.set(cacheKey, songsInPlaylist);
     return songsInPlaylist;
   }
 

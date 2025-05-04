@@ -65,7 +65,7 @@ export class FriendController {
       ),
     );
 
-    if (friendList) this.cacheManager.set(cacheKey, friendList, 300);
+    if (friendList) this.cacheManager.set(cacheKey, friendList);
 
     return friendList;
   }

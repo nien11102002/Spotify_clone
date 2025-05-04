@@ -1,0 +1,24 @@
+# Đặt tên
+name: CI docker
+
+# Khi nào chạy
+on:
+  push:
+    branches: ["master"]
+
+# Chạy công việc gì
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login docker
+        run: docker login -u nien11102002 -p ${{secrets.PASS_DOCKER}}
+
+      - name: build image
+        run: docker build ./ExpressJs -t nien11102002/img-be_cyber_media:latest
+
+      - name: push image lên docker hub
+        run: docker push nien11102002/img-be_cyber_media:latest

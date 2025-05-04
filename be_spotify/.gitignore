@@ -1,4 +1,3 @@
 .vscode
 *.bat
-logstash.conf
 .env

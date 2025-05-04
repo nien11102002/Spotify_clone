@@ -24,7 +24,7 @@ export class CommentController {
       this.commentService.send('find-discuss', { id }).pipe(handleRpcError()),
     );
 
-    if (discussResult) this.cacheManager.set(cacheKey, discussResult, 5 * 60);
+    if (discussResult) this.cacheManager.set(cacheKey, discussResult);
 
     return discussResult;
   }

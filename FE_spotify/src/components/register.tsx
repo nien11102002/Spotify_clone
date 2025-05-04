@@ -89,7 +89,7 @@ const FormRegister: React.FC<Props> = ({ propsHiddenModal }) => {
         </Form.Item>
         <Form.Item>
           <Button block type="primary" htmlType="submit">
-            Log in
+            Register
           </Button>
           or <a onClick={handleSwitchLogin}>Login!</a>
         </Form.Item>

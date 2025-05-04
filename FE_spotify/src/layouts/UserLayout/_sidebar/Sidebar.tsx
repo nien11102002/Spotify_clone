@@ -49,7 +49,7 @@ export default function Sidebar() {
   return (
     <div className="sidebar mt-3 pl-3 mr-2" style={{ width: "300px" }}>
       <div className="sidebar-top mb-2">
-        <button className="logo-spotify">
+        <button className="logo-spotify" onClick={() => navigate("/")}>
           <i className="fa-brands fa-spotify mr-2"></i>
           <span>Spotify</span>
         </button>

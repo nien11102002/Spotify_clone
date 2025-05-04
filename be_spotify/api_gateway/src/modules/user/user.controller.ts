@@ -40,7 +40,7 @@ export class UserController {
         ),
       );
 
-      if (allUsers) this.cacheManager.set(cacheKey, allUsers, 300);
+      if (allUsers) this.cacheManager.set(cacheKey, allUsers);
 
       return allUsers;
     } catch (err) {
@@ -61,7 +61,7 @@ export class UserController {
         this.userService.send('find-user', { id }).pipe(handleRpcError()),
       );
 
-      if (user) this.cacheManager.set(cacheKey, user, 300);
+      if (user) this.cacheManager.set(cacheKey, user);
 
       return user;
     } catch (err) {

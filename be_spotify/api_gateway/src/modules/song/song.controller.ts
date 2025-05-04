@@ -35,7 +35,7 @@ export class SongController {
         .pipe(handleRpcError()),
     );
 
-    if (songs) this.cacheManager.set(cacheKey, songs, 300);
+    if (songs) this.cacheManager.set(cacheKey, songs);
 
     return songs;
   }
@@ -52,7 +52,7 @@ export class SongController {
       this.songService.send('all-songs', {}).pipe(handleRpcError()),
     );
 
-    if (songs) this.cacheManager.set(cacheKey, songs, 300);
+    if (songs) this.cacheManager.set(cacheKey, songs);
 
     return songs;
   }
@@ -69,7 +69,7 @@ export class SongController {
       this.songService.send('find-song', { id }).pipe(handleRpcError()),
     );
 
-    if (song) this.cacheManager.set(cacheKey, song, 300);
+    if (song) this.cacheManager.set(cacheKey, song);
 
     return song;
   }
@@ -86,7 +86,7 @@ export class SongController {
       this.songService.send('all-genres', {}).pipe(handleRpcError()),
     );
 
-    if (genres) this.cacheManager.set(cacheKey, genres, 300);
+    if (genres) this.cacheManager.set(cacheKey, genres);
 
     return genres;
   }
@@ -103,7 +103,7 @@ export class SongController {
       this.songService.send('play-music', { id }).pipe(handleRpcError()),
     );
 
-    if (song) this.cacheManager.set(cacheKey, song, 300);
+    if (song) this.cacheManager.set(cacheKey, song);
 
     return song;
   }
